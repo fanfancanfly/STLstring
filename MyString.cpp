@@ -1,58 +1,58 @@
-// MyString.cpp : ¶¨Òå¿ØÖÆÌ¨Ó¦ÓÃ³ÌĞòµÄÈë¿Úµã¡£
+ï»¿// MyString.cpp : å®šä¹‰æ§åˆ¶å°åº”ç”¨ç¨‹åºçš„å…¥å£ç‚¹ã€‚
 //
 /*****************************************
-**¹¦ÄÜ£º×Ô¼ºÊµÏÖC++ STLµÄstringÈİÆ÷Àà
-**×÷Õß£ºĞ»·²·²
-**Ê±¼ä£º2015-07-21  02£º20
+**åŠŸèƒ½ï¼šè‡ªå·±å®ç°C++ STLçš„stringå®¹å™¨ç±»
+**ä½œè€…ï¼šè°¢å‡¡å‡¡
+**æ—¶é—´ï¼š2015-07-21  02ï¼š20
 *****************************************/
 #include "stdafx.h"
 #include <iostream>
 #include <string>
-#include <iomanip>                                       //ºó±ßÓÃµ½º¯ÊısetwÉèÖÃÓò¿í£¬ËùÒÔ°üº¬¸ÃÍ·ÎÄ¼ş
+#include <iomanip>                                       //åè¾¹ç”¨åˆ°å‡½æ•°setwè®¾ç½®åŸŸå®½ï¼Œæ‰€ä»¥åŒ…å«è¯¥å¤´æ–‡ä»¶
 
 using namespace std;
 
-//×Ô¼º³¢ÊÔĞ´µÄÒ»¸östringÈİÆ÷Àà
+//è‡ªå·±å°è¯•å†™çš„ä¸€ä¸ªstringå®¹å™¨ç±»
 class MyString
 {
-    friend ostream& operator<<(ostream&,MyString&);      //Êä³öÔËËã·ûÖØÔØ£¬ÓÑÔªº¯Êı
-    friend istream& operator>>(istream&,MyString&);      //ÊäÈëÔËËã·ûÖØÔØ
+    friend ostream& operator<<(ostream&,MyString&);      //è¾“å‡ºè¿ç®—ç¬¦é‡è½½ï¼Œå‹å…ƒå‡½æ•°
+    friend istream& operator>>(istream&,MyString&);      //è¾“å…¥è¿ç®—ç¬¦é‡è½½
 public:
-    MyString(const char* str = NULL);                   //Ä¬ÈÏ¹¹Ôìº¯Êı£¬º¬ÓĞÒ»¸öÄ¬ÈÏ²ÎÊı
-    MyString(const MyString& other);                    //¿½±´¹¹Ôìº¯Êı,¿½±´ÁËÊı¾İ£¬ËùÒÔËµÉî¿½±´
-    MyString& operator=(const MyString& other);         //ÖØÔØ¸³ÖµÔËËã·û
-    MyString operator+(const MyString& other) const;     //ÖØÔØ¼ÓºÅÔËËã·û
+    MyString(const char* str = NULL);                   //é»˜è®¤æ„é€ å‡½æ•°ï¼Œå«æœ‰ä¸€ä¸ªé»˜è®¤å‚æ•°
+    MyString(const MyString& other);                    //æ‹·è´æ„é€ å‡½æ•°,æ‹·è´äº†æ•°æ®ï¼Œæ‰€ä»¥è¯´æ·±æ‹·è´
+    MyString& operator=(const MyString& other);         //é‡è½½èµ‹å€¼è¿ç®—ç¬¦
+    MyString operator+(const MyString& other) const;     //é‡è½½åŠ å·è¿ç®—ç¬¦
     bool operator==(const MyString& );                  //operator==
     bool operator<(const MyString& );                   //operator<
     char& operator[](int);                     //operator[]
     size_t size() {return strlen(m_data);}
-    MyString& append(const MyString& other);             //ÔÚÎ²²¿²åÈë
-    MyString& insert(unsigned int ipos,const char *);    //ÈÎÒâÎ»ÖÃ²åÈë
-    MyString& replace(unsigned int ipos,unsigned int num,const char *);       //Ìæ»»²Ù×÷
-    MyString& erase(unsigned int start,unsigned int final);                   //É¾³ıº¯Êı
-    int find(const char* stem,int ipos = 0);                                  //²éÕÒº¯Êı
-    int find_first_of(const char* stem,int ipos = 0);                         //²éÕÒ×Ö·û´®ÖĞµÚÒ»¸öÔÚÖ¸¶¨´®ÖĞ³öÏÖµÄ×Ö·ûÎ»ÖÃ
-    int rfind(const char *stem,int ipos = -1);                                     //·´Ïò²éÕÒ£¬´Ó×óÍùÓÒÊıiposÎ»×öÎªÆğÊ¼µÄÎ»ÖÃ£¬È»ºó´ÓÓÒÍù×óÆ¥Åä£¬ÕÒµ½µÚÒ»¸ö·µ»ØÎ»ÖÃ
-    int npos;                                           //²éÑ¯±êÖ¾  ±íÊ¾×Ö·û´®²éÑ¯Ê§°Ü
-    //ÏÂ±ßĞ´µü´úÆ÷Àà
+    MyString& append(const MyString& other);             //åœ¨å°¾éƒ¨æ’å…¥
+    MyString& insert(unsigned int ipos,const char *);    //ä»»æ„ä½ç½®æ’å…¥
+    MyString& replace(unsigned int ipos,unsigned int num,const char *);       //æ›¿æ¢æ“ä½œ
+    MyString& erase(unsigned int start,unsigned int final);                   //åˆ é™¤å‡½æ•°
+    int find(const char* stem,int ipos = 0);                                  //æŸ¥æ‰¾å‡½æ•°
+    int find_first_of(const char* stem,int ipos = 0);                         //æŸ¥æ‰¾å­—ç¬¦ä¸²ä¸­ç¬¬ä¸€ä¸ªåœ¨æŒ‡å®šä¸²ä¸­å‡ºç°çš„å­—ç¬¦ä½ç½®
+    int rfind(const char *stem,int ipos = -1);                                     //åå‘æŸ¥æ‰¾ï¼Œä»å·¦å¾€å³æ•°iposä½åšä¸ºèµ·å§‹çš„ä½ç½®ï¼Œç„¶åä»å³å¾€å·¦åŒ¹é…ï¼Œæ‰¾åˆ°ç¬¬ä¸€ä¸ªè¿”å›ä½ç½®
+    int npos;                                           //æŸ¥è¯¢æ ‡å¿—  è¡¨ç¤ºå­—ç¬¦ä¸²æŸ¥è¯¢å¤±è´¥
+    //ä¸‹è¾¹å†™è¿­ä»£å™¨ç±»
     class Iterator
     {
         char *init;
     public:
-        inline Iterator(char* init) {this->init = init;}           //¹¹Ôìº¯Êı
-        inline bool operator!=(Iterator& it) {return this->init != it.init;}     //µü´úÆ÷µÄ¼¸¸öÔËËã·ûÖØÔØ
+        inline Iterator(char* init) {this->init = init;}           //æ„é€ å‡½æ•°
+        inline bool operator!=(Iterator& it) {return this->init != it.init;}     //è¿­ä»£å™¨çš„å‡ ä¸ªè¿ç®—ç¬¦é‡è½½
         inline void operator++(int){init = init + 1;}
         inline char operator*() {return *init;}
     };
-    char* Begin() {return m_data;}                        //»ñµÃµü´úÆ÷µÄÆğÊ¼Î»ÖÃ
-    char* End(){return m_end;}                          //»ñµÃµü´úÆ÷µÄÎ²ºóÎ»ÖÃ
-    ~MyString();                                        //Îö¹¹º¯Êı
+    char* Begin() {return m_data;}                        //è·å¾—è¿­ä»£å™¨çš„èµ·å§‹ä½ç½®
+    char* End(){return m_end;}                          //è·å¾—è¿­ä»£å™¨çš„å°¾åä½ç½®
+    ~MyString();                                        //ææ„å‡½æ•°
 private:
-    char* m_data;                                       //Ö¸Ïò¶¯Ì¬ÄÚ´æµÄÖ¸Õë
-    char* m_end;                                        //Î²ºóÖ¸Õë
+    char* m_data;                                       //æŒ‡å‘åŠ¨æ€å†…å­˜çš„æŒ‡é’ˆ
+    char* m_end;                                        //å°¾åæŒ‡é’ˆ
 };
 
-inline MyString::MyString(const char* str)              //Ä¬ÈÏ¹¹Ôìº¯ÊıÉèÎªÄÚÁª  ²»µôÓÃ  Ö±½ÓÌæ»»
+inline MyString::MyString(const char* str)              //é»˜è®¤æ„é€ å‡½æ•°è®¾ä¸ºå†…è”  ä¸æ‰ç”¨  ç›´æ¥æ›¿æ¢
 {
     if (!str)
     {
@@ -62,15 +62,15 @@ inline MyString::MyString(const char* str)              //Ä¬ÈÏ¹¹Ôìº¯ÊıÉèÎªÄÚÁª  
     else
     {
         m_data = new char[strlen(str)+1];
-        m_end = m_data + strlen(str);                  //Î²ºóµü´úÆ÷Î»ÖÃ
+        m_end = m_data + strlen(str);                  //å°¾åè¿­ä»£å™¨ä½ç½®
         strcpy(m_data,str);
     }
     npos = -1;
 }
 
-inline MyString::MyString(const MyString& other)       //¿½±´º¯Êı
+inline MyString::MyString(const MyString& other)       //æ‹·è´å‡½æ•°
 {
-    if (!other.m_data)                                 //ÔÚÀàµÄ³ÉÔ±º¯ÊıÄÚ¿ÉÒÔ·ÃÎÊÍ¬ÖÖ¶ÔÏóµÄË½ÓĞÊı¾İ(Í¬ÖÖÀàÊÇÓÑÔª¹ØÏµ)
+    if (!other.m_data)                                 //åœ¨ç±»çš„æˆå‘˜å‡½æ•°å†…å¯ä»¥è®¿é—®åŒç§å¯¹è±¡çš„ç§æœ‰æ•°æ®(åŒç§ç±»æ˜¯å‹å…ƒå…³ç³»)
     {
         m_data = NULL;
         m_end = NULL;
@@ -84,9 +84,9 @@ inline MyString::MyString(const MyString& other)       //¿½±´º¯Êı
     npos = -1;
 }
 
-inline MyString& MyString::operator=(const MyString& other)     //¸³ÖµÔËËã·û
+inline MyString& MyString::operator=(const MyString& other)     //èµ‹å€¼è¿ç®—ç¬¦
 {
-    if (this != &other)                                         //×¢Òâ£¬¸³ÖµÔËËã·û¿¼ÂÇ×Ô¸³Öµ
+    if (this != &other)                                         //æ³¨æ„ï¼Œèµ‹å€¼è¿ç®—ç¬¦è€ƒè™‘è‡ªèµ‹å€¼
     {
         delete [] m_data;
         m_end = m_data;
@@ -102,13 +102,13 @@ inline MyString& MyString::operator=(const MyString& other)     //¸³ÖµÔËËã·û
             strcpy(m_data,other.m_data);
         }
     }
-    return *this;                                             //thisÖ¸ÕëµÄÒıÓÃÎªÀà¶ÔÏó
+    return *this;                                             //thisæŒ‡é’ˆçš„å¼•ç”¨ä¸ºç±»å¯¹è±¡
 }
 
-inline MyString MyString::operator+(const MyString& other)const    //¼ÓºÅÖØÔØ
+inline MyString MyString::operator+(const MyString& other)const    //åŠ å·é‡è½½
 {
-    //¿¼ÂÇ¶àÖÖÇé¿ö
-    MyString newString;               //¼ÓºÅÖØÔØ£¬·µ»ØÒ»¸öÖµ£¬ËùÒÔÓÃÒ»¸öÁÙÊ±±äÁ¿·µ»Ø
+    //è€ƒè™‘å¤šç§æƒ…å†µ
+    MyString newString;               //åŠ å·é‡è½½ï¼Œè¿”å›ä¸€ä¸ªå€¼ï¼Œæ‰€ä»¥ç”¨ä¸€ä¸ªä¸´æ—¶å˜é‡è¿”å›
     if (!other.m_data)
     {
         newString = *this;
@@ -149,13 +149,13 @@ inline bool MyString::operator<(const MyString& other)                   //opera
     {
         return false;
     }
-    else if (strlen(m_data) == 0 && strlen(other.m_data) == 0)          //±íÊ¾Á½¸ö¶¼Îª¿Õ
+    else if (strlen(m_data) == 0 && strlen(other.m_data) == 0)          //è¡¨ç¤ºä¸¤ä¸ªéƒ½ä¸ºç©º
     {
         return false;
     }
 
     int iIndex = 0;
-    while (m_data[iIndex] && other.m_data[iIndex])              //ÏàÍ¬³¤¶ÈÖğ¸ö±È½Ï×Ö·û
+    while (m_data[iIndex] && other.m_data[iIndex])              //ç›¸åŒé•¿åº¦é€ä¸ªæ¯”è¾ƒå­—ç¬¦
     {
         if (m_data[iIndex] < other.m_data[iIndex])
         {
@@ -170,7 +170,7 @@ inline bool MyString::operator<(const MyString& other)                   //opera
             ++iIndex;
         }
     }
-    if (!m_data[iIndex] && other.m_data[iIndex])                 //µÚÒ»¸ö×Ö·û´®±ÈµÚ¶ş¸ö×Ö·û´®¶Ì µ«Ç°±ßÏàÍ¬  eg: xiefanfan xiefanfanaa
+    if (!m_data[iIndex] && other.m_data[iIndex])                 //ç¬¬ä¸€ä¸ªå­—ç¬¦ä¸²æ¯”ç¬¬äºŒä¸ªå­—ç¬¦ä¸²çŸ­ ä½†å‰è¾¹ç›¸åŒ  eg: xiefanfan xiefanfanaa
     {
         return true;
     }
@@ -192,21 +192,21 @@ inline char& MyString::operator[](int num)
     }
 }
 
-ostream& operator<<(ostream& os,MyString& mstem)            //ÓÑÔªº¯Êı£¬±íÊ¾¸Ãº¯Êı²»ÊÇ¸ÃÀàµÄ³ÉÔ±£¬µ«ÊÇ¿ÉÒÔ²Ù×÷ÀàµÄË½ÓĞÊı¾İ
+ostream& operator<<(ostream& os,MyString& mstem)            //å‹å…ƒå‡½æ•°ï¼Œè¡¨ç¤ºè¯¥å‡½æ•°ä¸æ˜¯è¯¥ç±»çš„æˆå‘˜ï¼Œä½†æ˜¯å¯ä»¥æ“ä½œç±»çš„ç§æœ‰æ•°æ®
 {
-    os<<mstem.m_data;                                       //²»ÒªÌí¼Ó¸ñÊ½¿ØÖÆ·û£¬Ö»×öÊä³ö
-    return os;                                              //returnÖ§³ÖÁ¬Ğø<<
+    os<<mstem.m_data;                                       //ä¸è¦æ·»åŠ æ ¼å¼æ§åˆ¶ç¬¦ï¼Œåªåšè¾“å‡º
+    return os;                                              //returnæ”¯æŒè¿ç»­<<
 }
 
 istream& operator>>(istream& is,MyString& mstem)
 {
-    char temp[255];                                         //ÁÙÊ±»º³å¿Õ¼ä
+    char temp[255];                                         //ä¸´æ—¶ç¼“å†²ç©ºé—´
     is>>setw(255)>>temp;
-    mstem = temp;                                           //Ê¹ÓÃ¸³ÖµÔËËã·û
-    return is;											    //returnÖ§³ÖÁ¬Ğø>>
+    mstem = temp;                                           //ä½¿ç”¨èµ‹å€¼è¿ç®—ç¬¦
+    return is;											    //returnæ”¯æŒè¿ç»­>>
 }
 
-MyString::~MyString()                                      //Îö¹¹º¯Êı
+MyString::~MyString()                                      //ææ„å‡½æ•°
 {
     if (m_data)
     {
@@ -216,9 +216,9 @@ MyString::~MyString()                                      //Îö¹¹º¯Êı
     }
 }
 
-MyString& MyString::append(const MyString& other)             //ÔÚÎ²²¿²åÈë  ²Î¿¼operator+º¯Êı
+MyString& MyString::append(const MyString& other)             //åœ¨å°¾éƒ¨æ’å…¥  å‚è€ƒoperator+å‡½æ•°
 {
-    MyString newString;                                       //ÉêÇëÒ»¸öÁÙÊ±¿Õ¼ä  ½«Ô­Ê¼×Ö·û´®±£´æÆğÀ´
+    MyString newString;                                       //ç”³è¯·ä¸€ä¸ªä¸´æ—¶ç©ºé—´  å°†åŸå§‹å­—ç¬¦ä¸²ä¿å­˜èµ·æ¥
     if (!other.m_data)
     {
         return *this;
@@ -240,76 +240,76 @@ MyString& MyString::append(const MyString& other)             //ÔÚÎ²²¿²åÈë  ²Î¿¼
         return *this;
     }
 }
-MyString& MyString::insert(unsigned int ipos,const char *stem)            //ÈÎÒâÎ»ÖÃ²åÈëº¯Êı
+MyString& MyString::insert(unsigned int ipos,const char *stem)            //ä»»æ„ä½ç½®æ’å…¥å‡½æ•°
 {
     MyString newString;
     int iIndex;
-    if (ipos >= 0 && ipos < strlen(m_data))                               //iposÔÚ·¶Î§ÄÚ²¿
+    if (ipos >= 0 && ipos < strlen(m_data))                               //iposåœ¨èŒƒå›´å†…éƒ¨
     {
-        newString.m_data = new char[strlen(m_data) + strlen(stem) +1];     //ÉêÇë¿Õ¼ä
+        newString.m_data = new char[strlen(m_data) + strlen(stem) +1];     //ç”³è¯·ç©ºé—´
         newString.m_end = m_data + strlen(m_data) + strlen(stem);
         for (iIndex = 0;iIndex < strlen(m_data) + strlen(stem);++iIndex)
         {
-            if (iIndex < ipos)                                             //¿½±´Ô­Ê¼´®  iposÇ°µÄÊı¾İ                        
+            if (iIndex < ipos)                                             //æ‹·è´åŸå§‹ä¸²  iposå‰çš„æ•°æ®                        
             {
                 newString.m_data[iIndex] = m_data[iIndex];
             }
             else
             {
-                if (iIndex >= ipos && iIndex < (ipos + strlen(stem)))     //Ìí¼Ó×Ó´®
+                if (iIndex >= ipos && iIndex < (ipos + strlen(stem)))     //æ·»åŠ å­ä¸²
                 {
                     newString.m_data[iIndex] = stem[iIndex - ipos];
                 }
-                else                                                      //Ìí¼ÓÔ­À´×Ö·û´®ºó±ßµÄ´®
+                else                                                      //æ·»åŠ åŸæ¥å­—ç¬¦ä¸²åè¾¹çš„ä¸²
                 {
                     newString.m_data[iIndex] = m_data[iIndex - strlen(stem)];
                 }
             }
         }
-        newString.m_data[iIndex] = NULL;                                      //×îºóÒ»Î»ÖÃ¿Õ ±íÊ¾×Ö·û´®½áÊø
+        newString.m_data[iIndex] = NULL;                                      //æœ€åä¸€ä½ç½®ç©º è¡¨ç¤ºå­—ç¬¦ä¸²ç»“æŸ
     }
     *this = newString;
     return *this;
 }
 
-MyString& MyString::replace(unsigned int ipos,unsigned int num,const char *stem)            //Ìæ»»²Ù×÷                                   
+MyString& MyString::replace(unsigned int ipos,unsigned int num,const char *stem)            //æ›¿æ¢æ“ä½œ                                   
 {
-    MyString newString;                                                   //ÁÙÊ±»º´æ×Ö·û´®
+    MyString newString;                                                   //ä¸´æ—¶ç¼“å­˜å­—ç¬¦ä¸²
     int iIndex;
     if (ipos >= 0 && ipos < strlen(m_data) )
     {
-        int iNewlen = strlen(m_data) + strlen(stem) - num;                //ĞÂµÄ³¤¶È
+        int iNewlen = strlen(m_data) + strlen(stem) - num;                //æ–°çš„é•¿åº¦
         newString.m_data = new char[iNewlen + 1];
         newString.m_end = m_data + iNewlen;
         for (iIndex = 0;iIndex < iNewlen;++iIndex)
         {
-            if (iIndex < ipos)                                             //¿½±´iposË÷ÒıÇ°µÄ×Ö·û
+            if (iIndex < ipos)                                             //æ‹·è´iposç´¢å¼•å‰çš„å­—ç¬¦
             {
                 newString.m_data[iIndex] = m_data[iIndex];
             }
-            else if (iIndex >= ipos && iIndex < ipos + strlen(stem))       //¿½±´Ìæ»»µÄ´®
+            else if (iIndex >= ipos && iIndex < ipos + strlen(stem))       //æ‹·è´æ›¿æ¢çš„ä¸²
             {
                 newString.m_data[iIndex] = stem[iIndex - ipos];
             }
-            else                                                           //¿½±´Ô­´®Ê£ÓàµÄ²¿·Ö
+            else                                                           //æ‹·è´åŸä¸²å‰©ä½™çš„éƒ¨åˆ†
             {
                 newString.m_data[iIndex] = m_data[iIndex - strlen(stem) + num];       
             }
         }
     }
-    newString.m_data[iIndex] = '\0';                                   //×Ö·û´®×îºóÖÃÎª0                
+    newString.m_data[iIndex] = '\0';                                   //å­—ç¬¦ä¸²æœ€åç½®ä¸º0                
     *this = newString;  
     return *this;
 }
-/////////////////////////////´Ë´¦Ó¦¸ÃÓÃµÄµü´úÆ÷/////////////////////////////////////////////
-MyString& MyString::erase(unsigned int start,unsigned int final)                   //É¾³ıº¯Êı
+/////////////////////////////æ­¤å¤„åº”è¯¥ç”¨çš„è¿­ä»£å™¨/////////////////////////////////////////////
+MyString& MyString::erase(unsigned int start,unsigned int final)                   //åˆ é™¤å‡½æ•°
 {
     if (start >= 0 && start < strlen(m_data) && final >= 0 && final < strlen(m_data) && start <= final)
     {
         int iIndex;
         for (iIndex = final;iIndex < strlen(m_data);++iIndex )
         {
-            m_data[iIndex - final + start] = m_data[iIndex];                       //ºó±ß¸²¸ÇÇ°±ß
+            m_data[iIndex - final + start] = m_data[iIndex];                       //åè¾¹è¦†ç›–å‰è¾¹
         }
         m_data[iIndex - (final - start)] = '\0';
         m_end = m_data + iIndex - (final - start);
@@ -317,16 +317,16 @@ MyString& MyString::erase(unsigned int start,unsigned int final)                
     return *this;
 }
 
-int MyString::find(const char* stem,int ipos )                                  //×Ö´®²éÕÒº¯Êı  
+int MyString::find(const char* stem,int ipos )                                  //å­—ä¸²æŸ¥æ‰¾å‡½æ•°  
 {
-    if (ipos + strlen(stem) > strlen(m_data))                                      //³¬³ö·¶Î§
+    if (ipos + strlen(stem) > strlen(m_data))                                      //è¶…å‡ºèŒƒå›´
     {
         return npos;
     }
-    for (int iIndex = ipos;iIndex < strlen(m_data) - strlen(stem);++iIndex)        //ÔÚ³¤µÄ´®ÖĞÆ¥ÅäÖ¸¶¨µÄ´®  ÈôÒª¿ìËÙÆ¥Åä  ¿ÉÒÔÓÃKMPËã·¨
+    for (int iIndex = ipos;iIndex < strlen(m_data) - strlen(stem);++iIndex)        //åœ¨é•¿çš„ä¸²ä¸­åŒ¹é…æŒ‡å®šçš„ä¸²  è‹¥è¦å¿«é€ŸåŒ¹é…  å¯ä»¥ç”¨KMPç®—æ³•
     {
         int jval = 0;
-        while (stem[jval] && stem[jval] == m_data[iIndex + jval])                 //ÖğÎ»Æ¥Åä
+        while (stem[jval] && stem[jval] == m_data[iIndex + jval])                 //é€ä½åŒ¹é…
         {
             jval++;
         }
@@ -338,7 +338,7 @@ int MyString::find(const char* stem,int ipos )                                  
     return npos;
 }
 
-int MyString::find_first_of(const char* stem,int ipos)                         //²éÕÒ×Ö·û´®ÖĞµÚÒ»¸öÔÚÖ¸¶¨´®ÖĞ³öÏÖµÄ×Ö·ûÎ»ÖÃ
+int MyString::find_first_of(const char* stem,int ipos)                         //æŸ¥æ‰¾å­—ç¬¦ä¸²ä¸­ç¬¬ä¸€ä¸ªåœ¨æŒ‡å®šä¸²ä¸­å‡ºç°çš„å­—ç¬¦ä½ç½®
 {
     int length = strlen(m_data);
     int iIndex;
@@ -346,7 +346,7 @@ int MyString::find_first_of(const char* stem,int ipos)                         /
     {
         for (int iIndex1 = 0;iIndex1 < strlen(stem);++iIndex1)
         {
-            if (m_data[iIndex] == stem[iIndex1])                         //Èç¹ûÆ¥ÅäÉÏÒ»¸ö×Ö·û£¬·µ»Ø×ø±ê
+            if (m_data[iIndex] == stem[iIndex1])                         //å¦‚æœåŒ¹é…ä¸Šä¸€ä¸ªå­—ç¬¦ï¼Œè¿”å›åæ ‡
             {
                 return iIndex;
             }
@@ -357,7 +357,7 @@ int MyString::find_first_of(const char* stem,int ipos)                         /
         return npos;
     }
 }
-int MyString::rfind(const char *stem,int ipos)                                 //·´Ïò²éÕÒ
+int MyString::rfind(const char *stem,int ipos)                                 //åå‘æŸ¥æ‰¾
 {
     if (ipos == npos)
     {
@@ -365,12 +365,12 @@ int MyString::rfind(const char *stem,int ipos)                                 /
     }
     for (int iIndex = ipos;iIndex >= 0;--iIndex)
     {
-        int slen = strlen(m_data);                         //Ô­´®³¤¶È
-        int slen1 = strlen(stem);                          //Æ¥Åä´®³¤¶È
-        if ((slen - iIndex) >= slen1)                      //µ±Ç°×Ö·ûºó±ß×Ö·ûÊı´óÓÚµÈÓÚ´øÆ¥Åä´®
+        int slen = strlen(m_data);                         //åŸä¸²é•¿åº¦
+        int slen1 = strlen(stem);                          //åŒ¹é…ä¸²é•¿åº¦
+        if ((slen - iIndex) >= slen1)                      //å½“å‰å­—ç¬¦åè¾¹å­—ç¬¦æ•°å¤§äºç­‰äºå¸¦åŒ¹é…ä¸²
         {
             int tem = 0;
-            while (m_data[iIndex + tem] == stem[tem] && tem < slen1)        //ÖğÏîÆ¥Åä
+            while (m_data[iIndex + tem] == stem[tem] && tem < slen1)        //é€é¡¹åŒ¹é…
             {
                 ++tem;
             }
@@ -380,7 +380,7 @@ int MyString::rfind(const char *stem,int ipos)                                 /
             }
         }
     }
-    return npos;                                             //Èç¹ûÉÏ±ßÃ»ÓĞÆ¥ÅäÉÏ£¬±íÊ¾²»´æÔÚÆ¥ÅäÏî
+    return npos;                                             //å¦‚æœä¸Šè¾¹æ²¡æœ‰åŒ¹é…ä¸Šï¼Œè¡¨ç¤ºä¸å­˜åœ¨åŒ¹é…é¡¹
 }
 
 
