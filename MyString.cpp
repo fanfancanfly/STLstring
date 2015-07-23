@@ -34,20 +34,35 @@ public:
     int find_first_of(const char* stem,int ipos = 0);                         //查找字符串中第一个在指定串中出现的字符位置
     int rfind(const char *stem,int ipos = -1);                                     //反向查找，从左往右数ipos位做为起始的位置，然后从右往左匹配，找到第一个返回位置
     int npos;                                           //查询标志  表示字符串查询失败
-    virtual ~MyString();                                        //析构函数
+    //下边写迭代器类
+    class Iterator
+    {
+        char *init;
+    public:
+        inline Iterator(char* init) {this->init = init;}           //构造函数
+        inline bool operator!=(Iterator& it) {return this->init != it.init;}     //迭代器的几个运算符重载
+        inline void operator++(int){init = init + 1;}
+        inline char operator*() {return *init;}
+    };
+    char* Begin() {return m_data;}                        //获得迭代器的起始位置
+    char* End(){return m_end;}                          //获得迭代器的尾后位置
+    ~MyString();                                        //析构函数
 private:
     char* m_data;                                       //指向动态内存的指针
+    char* m_end;                                        //尾后指针
 };
 
-inline MyString::MyString(const char* str)       //默认构造函数设为内联  不掉用  直接替换
+inline MyString::MyString(const char* str)              //默认构造函数设为内联  不掉用  直接替换
 {
     if (!str)
     {
         m_data =NULL;
+        m_end = NULL;
     }
     else
     {
         m_data = new char[strlen(str)+1];
+        m_end = m_data + strlen(str);                  //尾后迭代器位置
         strcpy(m_data,str);
     }
     npos = -1;
@@ -58,10 +73,12 @@ inline MyString::MyString(const MyString& other)       //拷贝函数
     if (!other.m_data)                                 //在类的成员函数内可以访问同种对象的私有数据(同种类是友元关系)
     {
         m_data = NULL;
+        m_end = NULL;
     }
     else
     {
         m_data = new char[strlen(other.m_data)+1];
+        m_end = m_data + strlen(other.m_data);
         strcpy(m_data,other.m_data);
     }
     npos = -1;
@@ -72,13 +89,16 @@ inline MyString& MyString::operator=(const MyString& other)     //赋值运算符
     if (this != &other)                                         //注意，赋值运算符考虑自赋值
     {
         delete [] m_data;
+        m_end = m_data;
         if (!other.m_data)
         {
             m_data = NULL;
+            m_end = NULL;
         }
         else
         {
             m_data = new char[strlen(other.m_data)+1];
+            m_end = m_data + strlen(other.m_data);
             strcpy(m_data,other.m_data);
         }
     }
@@ -100,6 +120,7 @@ inline MyString MyString::operator+(const MyString& other)const    //加号重载
     else
     {
         newString.m_data = new char[strlen(m_data) + strlen(other.m_data) +1];
+        newString.m_end = newString.m_data + strlen(m_data) + strlen(other.m_data);
         strcpy(newString.m_data,m_data);
         strcat(newString.m_data,other.m_data);
     }
@@ -190,6 +211,8 @@ MyString::~MyString()                                      //析构函数
     if (m_data)
     {
         delete [] m_data;
+        m_data = NULL;
+        m_end = NULL;
     }
 }
 
@@ -203,6 +226,7 @@ MyString& MyString::append(const MyString& other)             //在尾部插入  参考
     else if (!m_data)
     {
         m_data = new char[strlen(other.m_data) + 1];
+        m_end = m_data + strlen(other.m_data);
         strcpy(m_data,other.m_data);
         return *this;
     }
@@ -210,6 +234,7 @@ MyString& MyString::append(const MyString& other)             //在尾部插入  参考
     {
         newString = *this;
         m_data = new char[strlen(newString.m_data) + strlen(other.m_data) +1];
+        m_end = m_data + strlen(newString.m_data) + strlen(other.m_data);
         strcpy(m_data,newString.m_data);
         strcat(m_data,other.m_data);
         return *this;
@@ -222,7 +247,8 @@ MyString& MyString::insert(unsigned int ipos,const char *stem)            //任意
     if (ipos >= 0 && ipos < strlen(m_data))                               //ipos在范围内部
     {
         newString.m_data = new char[strlen(m_data) + strlen(stem) +1];     //申请空间
-        for (iIndex = 0;iIndex < strlen(newString.m_data)-1;++iIndex)
+        newString.m_end = m_data + strlen(m_data) + strlen(stem);
+        for (iIndex = 0;iIndex < strlen(m_data) + strlen(stem);++iIndex)
         {
             if (iIndex < ipos)                                             //拷贝原始串  ipos前的数据                        
             {
@@ -254,6 +280,7 @@ MyString& MyString::replace(unsigned int ipos,unsigned int num,const char *stem)
     {
         int iNewlen = strlen(m_data) + strlen(stem) - num;                //新的长度
         newString.m_data = new char[iNewlen + 1];
+        newString.m_end = m_data + iNewlen;
         for (iIndex = 0;iIndex < iNewlen;++iIndex)
         {
             if (iIndex < ipos)                                             //拷贝ipos索引前的字符
@@ -272,7 +299,7 @@ MyString& MyString::replace(unsigned int ipos,unsigned int num,const char *stem)
     }
     newString.m_data[iIndex] = '\0';                                   //字符串最后置为0                
     *this = newString;  
-        return *this;
+    return *this;
 }
 /////////////////////////////此处应该用的迭代器/////////////////////////////////////////////
 MyString& MyString::erase(unsigned int start,unsigned int final)                   //删除函数
@@ -285,6 +312,7 @@ MyString& MyString::erase(unsigned int start,unsigned int final)                
             m_data[iIndex - final + start] = m_data[iIndex];                       //后边覆盖前边
         }
         m_data[iIndex - (final - start)] = '\0';
+        m_end = m_data + iIndex - (final - start);
     }
     return *this;
 }
@@ -359,6 +387,14 @@ int MyString::rfind(const char *stem,int ipos)                                 /
 int _tmain(int argc, _TCHAR* argv[])
 {
     MyString str("fasfd");
+    str.erase(0,2);
+    MyString::Iterator start = str.Begin();
+    MyString::Iterator end = str.End();
+    while(start != end)
+    {
+        cout<<*start<<endl;
+        start++;
+    }
 
     return 0;
 }
