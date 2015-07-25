@@ -25,12 +25,13 @@ public:
     MyString& operator+=(const MyString &other);        //+号复合赋值运算符
     bool operator==(const MyString& );                  //operator==
     bool operator<(const MyString& );                   //operator<
-    char& operator[](int);                     //operator[]
-    size_t size() {return strlen(m_data);}     //返回字符串的长度
+    char& operator[](int);                              //operator[]
+    size_t size() {return strlen(m_data);}              //返回字符串的长度
     size_t length(){return strlen(m_data);}    
-    size_t capacity(){}                        //n*16-1  没写  暂时还没有用到有余量的内存分配方案
-    bool empty();                             //判断字符串是否为空
-    void reserve(size_t num){}                 //暂时还没有用到有余量的内存分配方案
+    size_t capacity(){return m_capacity;}                //n*16-1内存分配方案
+    bool empty();                                 //判断字符串是否为空
+    void reserve(size_t num = 0);                 //分配的保留空间  防止重复分配 或者 操作前有足够空间  影响capacity
+    void resize(size_t num,char ctem = 0);            //调整字符有效区域的尺寸
     char& at(int num);                           //字符操作
     MyString& assign(const char *);              //c字符串进行赋值
     MyString substr(int pos = 0,int num = -1) const;        //返回pos开始的n个字符的字符串
@@ -59,36 +60,48 @@ private:
     char* m_data;                                       //指向动态内存的指针
     char* m_end;                                        //尾后指针
     int npos;                                          //查询标志  表示字符串查询失败
+    int m_capacity;                                     //表示字符串的容量
 };
 
 inline MyString::MyString(const char* str)              //默认构造函数设为内联  不掉用  直接替换
 {
     if (!str)
     {
-        m_data =NULL;
-        m_end = NULL;
+        m_data = new char[16];        //初始分配16个字节
+        m_data[0] = '\0';             //第一个位置放字符串结束标识符
+        m_end = m_data+1;
+        m_capacity = 16 - 1;
     }
     else
     {
-        m_data = new char[strlen(str)+1];
-        m_end = m_data + strlen(str);                  //尾后迭代器位置
+        int num = 1;
+        while (strlen(str) > num*16)
+        {
+            ++num;
+        }
+        m_data = new char[num*16];
+        m_end = m_data + strlen(str);
         strcpy(m_data,str);
+        m_capacity = 16*num - 1;
     }
     npos = -1;
 }
 
 inline MyString::MyString(const MyString& other)       //拷贝函数
 {
-    if (!other.m_data)                                 //在类的成员函数内可以访问同种对象的私有数据(同种类是友元关系)
+    if (!other.m_data[0])                                 //在类的成员函数内可以访问同种对象的私有数据(同种类是友元关系)
     {
-        m_data = NULL;
-        m_end = NULL;
+        m_data = new char[16];        //初始分配16个字节
+        m_data[0] = '\0';             //第一个位置放字符串结束标识符
+        m_end = m_data+1;
+        m_capacity = 16 - 1;
     }
     else
     {
-        m_data = new char[strlen(other.m_data)+1];
-        m_end = m_data + strlen(other.m_data);
+        m_data = new char[other.m_capacity];
         strcpy(m_data,other.m_data);
+        m_end = m_data + strlen(other.m_data);
+        m_capacity = other.m_capacity;
     }
     npos = -1;
 }
@@ -97,18 +110,32 @@ inline MyString& MyString::operator=(const MyString& other)     //赋值运算符
 {
     if (this != &other)                                         //注意，赋值运算符考虑自赋值
     {
-        delete [] m_data;
-        m_end = m_data;
-        if (!other.m_data)
+        if (!other.m_data[0])                    //other为空
         {
-            m_data = NULL;
-            m_end = NULL;
+            if (m_data[0])
+            {
+                delete [] m_data;
+            }
+            m_data = new char[16];        //初始分配16个字节
+            m_data[0] = '\0';             //第一个位置放字符串结束标识符
+            m_end = m_data+1;
+            m_capacity = 16 -1;
         }
         else
         {
-            m_data = new char[strlen(other.m_data)+1];
-            m_end = m_data + strlen(other.m_data);
-            strcpy(m_data,other.m_data);
+            if (m_capacity < other.m_capacity)             //左边空间小  重新分配空间并拷贝内容
+            {
+                delete [] m_data;
+                m_data = new char[other.m_capacity];
+                strcpy(m_data,other.m_data);
+                m_end = m_data + strlen(other.m_data);
+                m_capacity = other.m_capacity;
+            }
+            else
+            {
+                strcpy(m_data,other.m_data);
+                m_end = m_data + strlen(other.m_data);
+            }
         }
     }
     return *this;                                             //this指针的引用为类对象
@@ -118,17 +145,23 @@ inline MyString MyString::operator+(const MyString& other)const    //加号重载
 {
     //考虑多种情况
     MyString newString;               //加号重载，返回一个值，所以用一个临时变量返回
-    if (!other.m_data)
+    if (!other.m_data[0])
     {
         newString = *this;
     }
-    else if (!m_data)
+    else if (!m_data[0])
     {
         newString = other;
     }
     else
     {
-        newString.m_data = new char[strlen(m_data) + strlen(other.m_data) +1];
+        int num = 1;
+        while (num*16 < (strlen(m_data) + strlen(other.m_data) +1))
+        {
+            ++num;
+        }
+        newString.m_data = new char[num*16];
+        newString.m_capacity = num*16 - 1;
         newString.m_end = newString.m_data + strlen(m_data) + strlen(other.m_data);
         strcpy(newString.m_data,m_data);
         strcat(newString.m_data,other.m_data);
@@ -140,17 +173,23 @@ MyString& MyString::operator+=(const MyString &other)                //+号复合赋
 {
     //考虑多种情况
     MyString newString;               //加号重载，返回一个引用，所以用一个临时变量返回给*this
-    if (!other.m_data)
+    if (!other.m_data[0])
     {
         newString = *this;
     }
-    else if (!m_data)
+    else if (!m_data[0])
     {
         newString = other;
     }
     else
     {
-        newString.m_data = new char[strlen(m_data) + strlen(other.m_data) +1];
+        int num = 1;
+        while (num*16 < (strlen(m_data) + strlen(other.m_data) +1))
+        {
+            ++num;
+        }
+        newString.m_data = new char[num*16];
+        newString.m_capacity = num*16 - 1;
         newString.m_end = newString.m_data + strlen(m_data) + strlen(other.m_data);
         strcpy(newString.m_data,m_data);
         strcat(newString.m_data,other.m_data);
@@ -159,9 +198,9 @@ MyString& MyString::operator+=(const MyString &other)                //+号复合赋
     return *this;
 }
 
-inline bool MyString::empty()
+inline bool MyString::empty()      //判断字符串是否为空
 {
-    if (!m_data)
+    if (!m_data[0])
     {
         return 1;
     }
@@ -169,7 +208,65 @@ inline bool MyString::empty()
     {
         return 0;
     }
-}                             //判断字符串是否为空
+}  
+void MyString::reserve(size_t num)                 //分配的保留空间  防止重复分配 或者 操作前有足够空间
+{
+    MyString newString = *this;                    //原来的内容保存
+    int num1 = 1;
+    while (16*num1 < newString.m_capacity)
+    {
+        ++num1;
+    }
+
+    if (m_data[0])
+    {
+        delete [] m_data;
+    }
+    m_data = new char[16*num1];
+    m_end = m_data + strlen(newString.m_data);
+    strcpy(m_data,newString.m_data);
+    m_capacity = 16*num1 - 1;
+
+}
+
+void MyString::resize(size_t num,char ctem)            //调整字符有效区域的尺寸
+{
+    MyString newString = *this;
+    if (num <= strlen(m_data))
+    {
+        erase(num,strlen(m_data));
+    }
+    else
+    {
+        int num1 = 1;
+        while (num1*16 < num)
+        {
+            ++num1;
+        }
+        if (m_data[0])
+        {
+            delete [] m_data;
+        }
+        m_data = new char[num1*16];
+        m_end = m_data + strlen(m_data) + num;
+        m_capacity = num1*16 - 1;
+        int iIndex = 0;
+        while (iIndex < strlen(m_data) + num)
+        {
+            if (iIndex < strlen(m_data))
+            {
+                m_data[iIndex] = newString.m_data[iIndex];
+            }
+            else if (iIndex < strlen(m_data) && iIndex < strlen(m_data + num))
+            {
+                m_data[iIndex] = ctem;
+            }
+            ++iIndex;
+        }
+        m_data[iIndex] = '\0';
+    }
+}
+
 inline bool MyString::operator==(const MyString& other)
 {
     if (strlen(other.m_data) != strlen(m_data))
@@ -223,20 +320,19 @@ inline bool MyString::operator<(const MyString& other)                   //opera
     }	
 }
 
-inline char& MyString::operator[](int num)
+inline char& MyString::operator[](int num)                  //[]运算符不管是否访问越界
 {
-    if (num < 0 || num >= strlen(m_data))
-    {
-        cout<<"string subscript out of range"<<endl;
-    }
-    if (num>=0 && num<strlen(m_data))
+    if (num >= 0 && num < strlen(m_data))
     {
         return m_data[num];
     }
 }
 
-char& MyString::at(int num)                                //字符操作
+
+char& MyString::at(int num)                                //字符操作  at函数需要对访问越界进行处理
 {
+    //访问越界处理code
+
     if (num>=0 && num<strlen(m_data))
     {
         return m_data[num];
@@ -247,19 +343,30 @@ MyString& MyString::assign(const char *stem)              //c字符串进行赋值
 {
     if (!stem)
     {
+        m_data = new char[16];
+        m_data[0] = '\0';
+        m_end = m_data + 1;
+        m_capacity = 16 - 1;
         return *this;
     }
     int iLength = strlen(stem);
-    if (m_data)
+    if (m_data[0])
     {
         delete [] m_data;
     }
-    m_data = new char[iLength + 1];                      //申请空间
+    int num = 1;
+    while (num*16 < strlen(stem + 1))
+    {
+        ++num;
+    }
+    m_data = new char[16*num];                           //申请空间
     strcpy(m_data,stem);                                 //拷贝数据
+    m_end = m_data + strlen(stem);
+    m_capacity = 16*num - 1;
     return *this;
 }
 
-MyString MyString::substr(int pos,int num) const        //返回pos开始的num个字符的字符串
+MyString MyString::substr(int pos,int num) const        //返回pos开始的num个字符的字符串  c语言风格
 {
     MyString newString;
     int iIndex;
@@ -309,27 +416,31 @@ MyString::~MyString()                                      //析构函数
 
 MyString& MyString::append(const MyString& other)             //在尾部插入  参考operator+函数
 {
-    MyString newString;                                       //申请一个临时空间  将原始字符串保存起来
-    if (!other.m_data)
+    //考虑多种情况
+    MyString newString;               //加号重载，返回一个引用，所以用一个临时变量返回给*this
+    if (!other.m_data[0])
     {
-        return *this;
+        newString = *this;
     }
-    else if (!m_data)
+    else if (!m_data[0])
     {
-        m_data = new char[strlen(other.m_data) + 1];
-        m_end = m_data + strlen(other.m_data);
-        strcpy(m_data,other.m_data);
-        return *this;
+        newString = other;
     }
     else
     {
-        newString = *this;
-        m_data = new char[strlen(newString.m_data) + strlen(other.m_data) +1];
-        m_end = m_data + strlen(newString.m_data) + strlen(other.m_data);
-        strcpy(m_data,newString.m_data);
-        strcat(m_data,other.m_data);
-        return *this;
+        int num = 1;
+        while (num*16 < (strlen(m_data) + strlen(other.m_data) +1))
+        {
+            ++num;
+        }
+        newString.m_data = new char[num*16];
+        newString.m_capacity = num*16 - 1;
+        newString.m_end = newString.m_data + strlen(m_data) + strlen(other.m_data);
+        strcpy(newString.m_data,m_data);
+        strcat(newString.m_data,other.m_data);
     }
+    *this = newString;
+    return *this;
 }
 MyString& MyString::insert(unsigned int ipos,const char *stem)            //任意位置插入函数
 {
@@ -337,8 +448,15 @@ MyString& MyString::insert(unsigned int ipos,const char *stem)            //任意
     int iIndex;
     if (ipos >= 0 && ipos < strlen(m_data))                               //ipos在范围内部
     {
-        newString.m_data = new char[strlen(m_data) + strlen(stem) +1];     //申请空间
+        int iLength = strlen(m_data) + strlen(stem) +1;
+        int num = 1;
+        while (num*16 < iLength)
+        {
+            ++num;
+        }        
+        newString.m_data = new char[num*16];     //申请空间
         newString.m_end = m_data + strlen(m_data) + strlen(stem);
+        newString.m_capacity = num*16 - 1;
         for (iIndex = 0;iIndex < strlen(m_data) + strlen(stem);++iIndex)
         {
             if (iIndex < ipos)                                             //拷贝原始串  ipos前的数据                        
@@ -370,8 +488,14 @@ MyString& MyString::replace(unsigned int ipos,unsigned int num,const char *stem)
     if (ipos >= 0 && ipos < strlen(m_data) )
     {
         int iNewlen = strlen(m_data) + strlen(stem) - num;                //新的长度
-        newString.m_data = new char[iNewlen + 1];
+        int num1 = 1;
+        while (num1*16 < iNewlen)
+        {
+            ++num1;
+        }
+        newString.m_data = new char[num1*16];
         newString.m_end = m_data + iNewlen;
+        newString.m_capacity = num1*16 - 1;
         for (iIndex = 0;iIndex < iNewlen;++iIndex)
         {
             if (iIndex < ipos)                                             //拷贝ipos索引前的字符
@@ -408,7 +532,7 @@ MyString& MyString::erase(unsigned int start,unsigned int final)                
     return *this;
 }
 
-int MyString::find(const char* stem,int ipos )                                  //字串查找函数  
+int MyString::find(const char* stem,int ipos)                                  //字串查找函数  
 {
     if (ipos + strlen(stem) > strlen(m_data))                                      //超出范围
     {
@@ -477,18 +601,8 @@ int MyString::rfind(const char *stem,int ipos)                                 /
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-    MyString str("fasfd");
-    MyString str1("smida");
-    str.swap(str1);
-    cout<<str<<" "<<str1<<endl;
-   /* MyString::Iterator start = str.Begin();
-    MyString::Iterator end = str.End();
-    while(start != end)
-    {
-        cout<<*start<<endl;
-        start++;
-    }*/
-
+    string str3 = "smiada";
+    str3.resize(10);
 
     return 0;
 }
