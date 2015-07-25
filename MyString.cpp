@@ -11,14 +11,25 @@
 #include <iomanip>                                       //后边用到函数setw设置域宽，所以包含该头文件
 
 using namespace std;
-
 //自己尝试写的一个string容器类
 class MyString
 {
     friend ostream& operator<<(ostream&,MyString&);      //输出运算符重载，友元函数
     friend istream& operator>>(istream&,MyString&);      //输入运算符重载
 public:
+    //下边写迭代器类
+    class Iterator
+    {
+        char *init;
+    public:
+        inline Iterator(char* init) {this->init = init;}           //构造函数
+        inline bool operator!=(Iterator& it) {return this->init != it.init;}     //迭代器的几个运算符重载
+        inline void operator++(int){init = init + 1;}
+        inline char operator*() {return *init;}
+    };
     MyString(const char* str = NULL);                   //默认构造函数，含有一个默认参数
+    MyString(const MyString&,int pos1,int pos2);        //用字符串中的一部分初始化另一个字符串
+    MyString(const char* ch1,const char* ch2);     //迭代器构造函数
     MyString(const MyString& other);                    //拷贝构造函数,拷贝了数据，所以说深拷贝
     MyString& operator=(const MyString& other);         //重载赋值运算符
     MyString operator+(const MyString& other) const;    //重载加号运算符
@@ -42,17 +53,10 @@ public:
     MyString& erase(unsigned int start,unsigned int final);                   //删除函数
     int find(const char* stem,int ipos = 0);                                  //查找函数
     int find_first_of(const char* stem,int ipos = 0);                         //查找字符串中第一个在指定串中出现的字符位置
-    int rfind(const char *stem,int ipos = -1);                                     //反向查找，从左往右数ipos位做为起始的位置，然后从右往左匹配，找到第一个返回位置                                            
-    //下边写迭代器类
-    class Iterator
-    {
-        char *init;
-    public:
-        inline Iterator(char* init) {this->init = init;}           //构造函数
-        inline bool operator!=(Iterator& it) {return this->init != it.init;}     //迭代器的几个运算符重载
-        inline void operator++(int){init = init + 1;}
-        inline char operator*() {return *init;}
-    };
+    int find_first_not_of(const char* stem,int ipos = 0);
+    int rfind(const char *stem,int ipos = -1);                                //反向查找，从左往右数ipos位做为起始的位置，然后从右往左匹配，找到第一个返回位置 
+    int find_last_of(const char* stem,int ipos = 0);                          //查找原串在指定串中最后一个出现字符的位置
+    int find_last_not_of(const char* stem,int ipos = 0);
     char* Begin() {return m_data;}                        //获得迭代器的起始位置
     char* End(){return m_end;}                          //获得迭代器的尾后位置
     ~MyString();                                        //析构函数
@@ -86,6 +90,43 @@ inline MyString::MyString(const char* str)              //默认构造函数设为内联  
     }
     npos = -1;
 }
+
+inline MyString::MyString(const MyString& other,int pos1,int pos2)            //构造函数
+{
+    m_data = new char[other.m_capacity];
+    m_end = m_data + pos2;
+    m_capacity = other.m_capacity;
+    int iIndex;
+    for (iIndex = 0;iIndex < pos2;++iIndex)
+    {
+        m_data[iIndex] = other.m_data[pos1 + iIndex];
+    }
+    m_data[iIndex] = '\0';
+}
+
+inline MyString::MyString(const char* ch1,const char* ch2)     //迭代器构造函数
+{
+    int iLength = 0;
+    while (ch1 != ch2)
+    {
+        ++iLength;
+    }
+    int num = 0;
+    while (num*16 < iLength)
+    {
+        ++num;
+    }
+    m_data = new char[num*16];
+    m_end = m_data + iLength;
+    m_capacity = num*16 - 1;
+    int index = 0;
+    while(ch1 != ch2)
+    {
+        m_data[index] = *ch1;
+        ++index;
+    }
+}
+
 
 inline MyString::MyString(const MyString& other)       //拷贝函数
 {
@@ -332,7 +373,6 @@ inline char& MyString::operator[](int num)                  //[]运算符不管是否访
 char& MyString::at(int num)                                //字符操作  at函数需要对访问越界进行处理
 {
     //访问越界处理code
-
     if (num>=0 && num<strlen(m_data))
     {
         return m_data[num];
@@ -557,21 +597,55 @@ int MyString::find_first_of(const char* stem,int ipos)                         /
 {
     int length = strlen(m_data);
     int iIndex;
-    for ( iIndex = 0;iIndex < length;++iIndex)
+    if (ipos >=0 && ipos < length)
     {
-        for (int iIndex1 = 0;iIndex1 < strlen(stem);++iIndex1)
+        for ( iIndex = ipos;iIndex < length;++iIndex)
         {
-            if (m_data[iIndex] == stem[iIndex1])                         //如果匹配上一个字符，返回坐标
+            for (int iIndex1 = 0;iIndex1 < strlen(stem);++iIndex1)
+            {
+                if (m_data[iIndex] == stem[iIndex1])                         //如果匹配上一个字符，返回坐标
+                {
+                    return iIndex;
+                }
+            }
+        }
+        if (iIndex >= length)
+        {
+            return npos;
+        }
+    }    
+}
+
+int MyString::find_first_not_of(const char* stem,int ipos)
+{
+    int length = strlen(m_data);
+    int iIndex;
+    int acc_equal;                      //统计相等的次数
+    if (ipos >=0 && ipos < length)
+    {
+        for ( iIndex = ipos;iIndex < length;++iIndex)
+        {
+            acc_equal = 0;
+            for (int iIndex1 = 0;iIndex1 < strlen(stem);++iIndex1)
+            {
+                if (m_data[iIndex] == stem[iIndex1])                         //如果匹配上一个字符，返回坐标
+                {
+                    ++acc_equal;
+                }
+            }
+            if (acc_equal == 0)
             {
                 return iIndex;
             }
+
         }
-    }
-    if (iIndex >= length)
-    {
-        return npos;
-    }
+        if (iIndex >= length)
+        {
+            return npos;
+        }
+    }    
 }
+
 int MyString::rfind(const char *stem,int ipos)                                 //反向查找
 {
     if (ipos == npos)
@@ -598,11 +672,70 @@ int MyString::rfind(const char *stem,int ipos)                                 /
     return npos;                                             //如果上边没有匹配上，表示不存在匹配项
 }
 
+int MyString::find_last_of(const char* stem,int ipos)                          //查找原串在指定串中最后一个出现字符的位置
+{
+    int length = strlen(m_data);
+    int iIndex;
+    if (ipos >=0 && ipos < length)
+    {
+        for ( iIndex = length - 1;iIndex >= 0;--iIndex)
+        {
+            for (int iIndex1 = 0;iIndex1 < strlen(stem);++iIndex1)
+            {
+                if (m_data[iIndex] == stem[iIndex1])                         //如果匹配上一个字符，返回坐标
+                {
+                    return iIndex;
+                }
+            }
+        }
+        if (iIndex >= length)
+        {
+            return npos;
+        }
+    }    
+}
+
+int MyString::find_last_not_of(const char* stem,int ipos)                   //查找原串在指定串中最后一个不出现的
+{
+    int length = strlen(m_data);
+    int iIndex;
+    int acc_equal;
+    if (ipos >=0 && ipos < length)
+    {
+        for ( iIndex = length - 1;iIndex >= 0;--iIndex)
+        {
+            acc_equal = 0;
+            for (int iIndex1 = 0;iIndex1 < strlen(stem);++iIndex1)
+            {
+                if (m_data[iIndex] == stem[iIndex1])                         //如果匹配上一个字符，返回坐标
+                {
+                    ++acc_equal;
+                }
+            }
+            if (acc_equal == 0)
+            {
+                return iIndex;
+            }
+        }
+        if (iIndex >= length)
+        {
+            return npos;
+        }
+    } 
+}
+
+
+
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-    string str3 = "smiada";
-    str3.resize(10);
+    MyString str = "haha";
+    MyString::Iterator strat = str.Begin();
+    MyString::Iterator end = str.End();
+    if (strat != end)
+    {
+        cout<<"fanfan"<<endl;
+    }
 
     return 0;
 }
