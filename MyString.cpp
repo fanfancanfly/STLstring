@@ -17,7 +17,7 @@ class MyString
     friend ostream& operator<<(ostream&,MyString&);      //Êä³öÔËËã·ûÖØÔØ£¬ÓÑÔªº¯Êı
     friend istream& operator>>(istream&,MyString&);      //ÊäÈëÔËËã·ûÖØÔØ
 public:
-    //ÏÂ±ßĞ´µü´úÆ÷Àà
+    //ÏÂ±ßĞ´ÆÕÍ¨µü´úÆ÷Àà£¬¶ÔÈİÆ÷ÖĞµÄÔªËØ¿ÉÒÔ¶ÁĞ´²Ù×÷
     class Iterator
     {
         char *init;
@@ -27,9 +27,19 @@ public:
         inline void operator++(int){init = init + 1;}
         inline char operator*() {return *init;}
     };
+    //ÏÂ±ßĞ´³£Á¿µü´úÆ÷Àà£¬¶ÔÈİÆ÷ÖĞµÄÔªËØ¿ÉÒÔ¶Á£¬µ«ÊÇ²»ÄÜĞŞ¸Ä(ÆäÊµ¾ÍÊÇÒ»¸öconstÀàĞÍ)
+    class const_Iterator
+    {
+        char *init;
+    public:
+        inline const_Iterator(char* init) {this->init = init;}           //¹¹Ôìº¯Êı
+        inline bool operator!=(const_Iterator& it) {return this->init != it.init;}     //µü´úÆ÷µÄ¼¸¸öÔËËã·ûÖØÔØ
+        inline void operator++(int){init = init + 1;}
+        inline const char operator*() {return  *init;}
+    };
     MyString(const char* str = NULL);                   //Ä¬ÈÏ¹¹Ôìº¯Êı£¬º¬ÓĞÒ»¸öÄ¬ÈÏ²ÎÊı
     MyString(const MyString&,int pos1,int pos2);        //ÓÃ×Ö·û´®ÖĞµÄÒ»²¿·Ö³õÊ¼»¯ÁíÒ»¸ö×Ö·û´®
-    MyString(const char* ch1,const char* ch2);     //µü´úÆ÷¹¹Ôìº¯Êı
+    MyString(Iterator it1,Iterator it2);     //µü´úÆ÷¹¹Ôìº¯Êı
     MyString(const MyString& other);                    //¿½±´¹¹Ôìº¯Êı,¿½±´ÁËÊı¾İ£¬ËùÒÔËµÉî¿½±´
     MyString& operator=(const MyString& other);         //ÖØÔØ¸³ÖµÔËËã·û
     MyString operator+(const MyString& other) const;    //ÖØÔØ¼ÓºÅÔËËã·û
@@ -104,27 +114,30 @@ inline MyString::MyString(const MyString& other,int pos1,int pos2)            //
     m_data[iIndex] = '\0';
 }
 
-inline MyString::MyString(const char* ch1,const char* ch2)     //µü´úÆ÷¹¹Ôìº¯Êı
+inline MyString::MyString(Iterator it1,Iterator it2)     //µü´úÆ÷¹¹Ôìº¯Êı
 {
-    int iLength = 0;
-    while (ch1 != ch2)
-    {
-        ++iLength;
-    }
     int num = 0;
-    while (num*16 < iLength)
+    Iterator tem1 = it1;                        //±£´æµÄÁÙÊ±±äÁ¿
+    while (it1 != it2)
     {
-        ++num;
+        num++;
+        it1++;
     }
-    m_data = new char[num*16];
-    m_end = m_data + iLength;
-    m_capacity = num*16 - 1;
+    int num1 = 1;
+    while (num1*16 < num)
+    {
+        ++num1;
+    }
+    m_data = new char[16*num1];
+    m_end  = m_data + num;
+    m_capacity = num1*16;
     int index = 0;
-    while(ch1 != ch2)
+    for (Iterator Ittem = tem1;Ittem != it2;Ittem++)
     {
-        m_data[index] = *ch1;
-        ++index;
+        m_data[index] = *Ittem;
+        index++;
     }
+    m_data[index] = '\0';
 }
 
 
@@ -376,6 +389,10 @@ char& MyString::at(int num)                                //×Ö·û²Ù×÷  atº¯ÊıĞèÒ
     if (num>=0 && num<strlen(m_data))
     {
         return m_data[num];
+    }
+    else
+    {
+        throw out_of_range("string at function");         //Å×³öÒ»¸öÒì³£
     }
 }
 
@@ -724,18 +741,10 @@ int MyString::find_last_not_of(const char* stem,int ipos)                   //²é
     } 
 }
 
-
-
-
 int _tmain(int argc, _TCHAR* argv[])
 {
     MyString str = "haha";
-    MyString::Iterator strat = str.Begin();
-    MyString::Iterator end = str.End();
-    if (strat != end)
-    {
-        cout<<"fanfan"<<endl;
-    }
+    cout<<str.at(-1)<<endl;
 
     return 0;
 }
